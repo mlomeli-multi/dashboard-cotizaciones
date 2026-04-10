@@ -303,6 +303,7 @@
         internalLosses: quoteRefs.filter((quote) => internalStatuses.has(quote.status)).length
       },
       monthRows,
+      statusRows: buildStatusRows(quoteRefs),
       modeRows: buildServiceRows(quoteRefs, convertedQuotes, (service) => modeOf(service)),
       subtypeRows: buildServiceRows(quoteRefs, convertedQuotes, (service) => service),
       ownershipRows: buildOwnershipRows(quoteRefs),
@@ -379,6 +380,14 @@
       const closuresCount = convertedMap.get(name) ? convertedMap.get(name).size : 0;
       return { name, quotes: quotesCount, closures: closuresCount, hitRate: closuresCount / Math.max(quotesCount, 1) };
     }).filter((row) => row.quotes || row.closures).sort((a, b) => b.quotes - a.quotes || b.closures - a.closures);
+  }
+
+  function buildStatusRows(quotes) {
+    const counts = new Map();
+    quotes.forEach((quote) => counts.set(quote.status, (counts.get(quote.status) || 0) + 1));
+    return Array.from(counts.entries())
+      .map(([status, count]) => ({ status, count }))
+      .sort((a, b) => b.count - a.count);
   }
 
   function buildOwnershipRows(quotes) {
@@ -476,6 +485,117 @@
 
   function renderSummaryV2(data) {
     window.__mltiLatestSummary = data;
+    updateResumenTab(data);
+  }
+
+  function updateResumenTab(data) {
+    const resumen = document.getElementById("resumen");
+    if (!resumen) return;
+
+    const cards = resumen.querySelectorAll(".cards .card");
+    const monthRows = data.monthRows;
+    const latestMonths = monthRows.slice(-3);
+    const monthAStats = data.meta.monthA ? monthRows.find((row) => row.key === data.meta.monthA.key) : null;
+    const monthBStats = data.meta.monthB ? monthRows.find((row) => row.key === data.meta.monthB.key) : null;
+    const deltaClosures = (monthBStats ? monthBStats.realClosures : 0) - (monthAStats ? monthAStats.realClosures : 0);
+    const deltaHitRate = (monthBStats ? monthBStats.hitRate : 0) - (monthAStats ? monthAStats.hitRate : 0);
+    const topModes = data.modeRows.slice(0, 2);
+
+    if (cards[0]) {
+      cards[0].querySelector(".card-value").textContent = int(data.totals.totalQuotes);
+      cards[0].querySelector(".card-sub").textContent = latestMonths.map((row) => `${shortMonth(row.label)}: ${int(row.quotes)}`).join(" · ");
+    }
+    if (cards[1]) {
+      cards[1].querySelector(".card-value").textContent = int(data.totals.totalRealClosures);
+      cards[1].querySelector(".card-sub").textContent = latestMonths.map((row) => `${shortMonth(row.label)}: ${int(row.realClosures)}`).join(" · ");
+      const delta = cards[1].querySelector(".card-delta");
+      if (delta) delta.textContent = `${deltaClosures >= 0 ? "↑" : "↓"} ${signed(deltaClosures)} vs ${monthAStats ? shortMonth(monthAStats.label) : "mes previo"}`;
+    }
+    if (cards[2]) {
+      cards[2].querySelector(".card-value").textContent = pct(data.totals.globalHitRate);
+      cards[2].querySelector(".card-sub").textContent = latestMonths.map((row) => `${shortMonth(row.label)}: ${pct(row.hitRate)}`).join(" · ");
+      const delta = cards[2].querySelector(".card-delta");
+      if (delta) delta.textContent = `${deltaHitRate >= 0 ? "↑" : "↓"} ${signedPct(deltaHitRate)} ${deltaHitRate >= 0 ? "Mejorando" : "Bajando"}`;
+    }
+    if (cards[3]) {
+      cards[3].querySelector(".card-value").textContent = int(data.totals.pipelineActive);
+      cards[3].querySelector(".card-sub").textContent = "Cotizadas listas para seguimiento";
+    }
+    if (cards[4]) {
+      cards[4].querySelector(".card-value").textContent = int(data.totals.operationalLosses);
+      cards[4].querySelector(".card-sub").textContent = `${int(data.totals.internalLosses)} por falla interna`;
+      const delta = cards[4].querySelector(".card-delta");
+      if (delta) delta.textContent = "↓ Oportunidades perdidas";
+    }
+
+    const insight = resumen.querySelector(".insight");
+    if (insight) {
+      const compareA = monthAStats ? `${pct(monthAStats.hitRate)} en ${shortMonth(monthAStats.label)}` : "sin mes base";
+      const compareB = monthBStats ? `${pct(monthBStats.hitRate)} en ${shortMonth(monthBStats.label)}` : "sin mes reciente";
+      const modesText = topModes.length ? topModes.map((row) => `${row.name} ${pct(row.hitRate)}`).join(" y ") : "sin modos detectados";
+      insight.innerHTML = `<strong>Insight clave:</strong> El hit rate pasó de <strong>${compareA}</strong> a <strong>${compareB}</strong>. Los mejores modos en esta carga son <strong>${modesText}</strong>.`;
+    }
+
+    const statusPanel = resumen.querySelector(".grid2 .panel");
+    if (statusPanel) {
+      const totalStatus = Math.max(data.totals.totalQuotes, 1);
+      const rows = data.statusRows.slice(0, 7).map((row) => {
+        const colorClass = statusColorClass(row.status);
+        return `<div class="bar-row"><div class="bar-label">${escapeHtml(shortStatus(row.status))}</div><div class="bar-track"><div class="bar-fill ${colorClass}" style="width:${((row.count / totalStatus) * 100).toFixed(1)}%"></div></div><div class="bar-val">${int(row.count)}</div></div>`;
+      }).join("");
+      const title = statusPanel.querySelector(".panel-title");
+      statusPanel.innerHTML = `${title ? title.outerHTML : ""}${rows}`;
+    }
+
+    const comparePanel = resumen.querySelectorAll(".grid2 .panel")[1];
+    if (comparePanel) {
+      const title = comparePanel.querySelector(".panel-title");
+      const aLabel = monthAStats ? monthAStats.label : "Mes A";
+      const bLabel = monthBStats ? monthBStats.label : "Mes B";
+      comparePanel.innerHTML = `
+        ${title ? title.outerHTML : ""}
+        <div style="margin-bottom:20px;">
+          <div class="bar-row">
+            <div class="bar-label">${escapeHtml(shortMonth(aLabel))}</div>
+            <div class="bar-track" style="height:14px"><div class="bar-fill orange" style="width:${monthAStats ? (monthAStats.hitRate * 100).toFixed(1) : 0}%"></div></div>
+            <div class="bar-val" style="font-size:14px; color:var(--accent)"><b>${pct(monthAStats ? monthAStats.hitRate : 0)}</b></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">${escapeHtml(shortMonth(bLabel))}</div>
+            <div class="bar-track" style="height:14px"><div class="bar-fill green" style="width:${monthBStats ? (monthBStats.hitRate * 100).toFixed(1) : 0}%"></div></div>
+            <div class="bar-val" style="font-size:14px; color:var(--accent3)"><b>${pct(monthBStats ? monthBStats.hitRate : 0)}</b></div>
+          </div>
+        </div>
+        <hr class="divider">
+        ${statLine(`Cotizaciones ${shortMonth(aLabel)}`, int(monthAStats ? monthAStats.quotes : 0))}
+        ${statLine(`Cotizaciones ${shortMonth(bLabel)}`, int(monthBStats ? monthBStats.quotes : 0))}
+        ${statLine(`Cierres ${shortMonth(aLabel)} (ventas)`, int(monthAStats ? monthAStats.realClosures : 0))}
+        ${statLine(`Cierres ${shortMonth(bLabel)} (ventas)`, int(monthBStats ? monthBStats.realClosures : 0))}
+        ${statLine("Cierres sin cotización", `<span style="color:var(--yellow)">${int(data.totals.totalSalesOnlyClosures)}</span>`)}
+      `;
+    }
+  }
+
+  function statLine(label, valueHtml) {
+    return `<div class="stat-row"><div class="stat-key">${escapeHtml(label)}</div><div class="stat-val">${valueHtml}</div></div>`;
+  }
+
+  function shortMonth(label) {
+    return String(label || "").split(" ")[0];
+  }
+
+  function shortStatus(status) {
+    if (status === "Cotizacion Cancelada") return "Cancelada";
+    if (status === "No Cotizado por Pricing") return "No Coti. Pricing";
+    if (status === "Cotizado Pricing Fuera de Tiempo") return "Fuera de Tiempo";
+    return status;
+  }
+
+  function statusColorClass(status) {
+    if (status === "Cotizado Agentes") return "orange";
+    if (status === "Cotizado Pricing") return "blue";
+    if (status === "Cerrado") return "green";
+    return "red";
   }
 
   function renderOverview(data) {
