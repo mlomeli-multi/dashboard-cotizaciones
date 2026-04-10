@@ -128,7 +128,7 @@
       const summary = buildSummary(quotes, salesRows, quoteFile.name, salesFile ? salesFile.name : "");
       localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(summary));
       renderSummaryV2(summary);
-      setFeedback("Dashboard actualizado con la lógica real de ventas vs cotizaciones.", "success");
+      setFeedback(`Archivos leídos. Cotizaciones: ${int(summary.totals.totalQuotes)} | Cierres reales: ${int(summary.totals.totalRealClosures)} | Hit rate: ${pct(summary.totals.globalHitRate)}`, "success");
     } catch (error) {
       console.error(error);
       setFeedback(error.message || "No pude procesar los archivos.", "error");
@@ -475,12 +475,7 @@
   }
 
   function renderSummaryV2(data) {
-    renderOverview(data);
-    renderServices(data);
-    renderClients(data);
-    renderTeam(data);
-    renderLosses(data);
-    renderTrend(data);
+    window.__mltiLatestSummary = data;
   }
 
   function renderOverview(data) {

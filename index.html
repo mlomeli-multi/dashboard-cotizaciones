@@ -221,48 +221,48 @@
 
   /* UPLOADER */
   .uploader {
-    width: 420px;
+    width: 100%;
     border: 1px solid rgba(59,130,246,.15);
     border-radius: 18px;
     background: linear-gradient(180deg, rgba(20,28,46,.96), rgba(11,15,26,.96));
     box-shadow: 0 18px 40px rgba(0,0,0,.18);
-    padding: 16px 16px 14px;
+    padding: 20px 22px 18px;
   }
   .uploader h2 {
     margin: 0 0 8px;
     font-family:'Syne',sans-serif;
-    font-size: 16px;
+    font-size: 18px;
     color: #fff;
   }
   .uploader p {
     margin: 0;
     color: var(--muted2);
-    font-size: 12px;
-    line-height: 1.45;
+    font-size: 13px;
+    line-height: 1.55;
   }
   .upload-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 12px;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 14px;
+    margin-top: 16px;
   }
   .upload-card {
     border: 1px solid var(--border);
     border-radius: 12px;
     background: rgba(255,255,255,.02);
-    padding: 12px;
+    padding: 16px;
   }
   .upload-card h3 {
     margin: 0 0 6px;
-    font-size: 13px;
+    font-size: 14px;
     color: #fff;
   }
   .upload-card small {
     display: block;
     color: var(--muted2);
-    font-size: 11px;
-    line-height: 1.4;
-    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 10px;
   }
   .upload-card input[type="file"] {
     width: 100%;
@@ -270,20 +270,20 @@
     background: rgba(11,15,26,.75);
     border: 1px dashed rgba(148,163,184,.25);
     border-radius: 10px;
-    padding: 8px;
+    padding: 10px;
   }
   .upload-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 12px;
+    margin-top: 16px;
   }
   .upload-actions button {
     border: none;
     border-radius: 12px;
     padding: 12px 16px;
     font-family:'Syne',sans-serif;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
   }
@@ -314,36 +314,38 @@
   .status-pill.ready { color: #bbf7d0; background: rgba(16,185,129,.12); }
   .status-pill.warn { color: #fde68a; background: rgba(245,158,11,.14); }
   .upload-feedback {
-    margin-top: 10px;
+    margin-top: 14px;
     min-height: 20px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted2);
-    line-height: 1.45;
+    line-height: 1.6;
   }
   .upload-feedback.error { color: #fecaca; }
   .upload-feedback.success { color: #bbf7d0; }
   .micro-note {
-    margin-top: 10px;
+    margin-top: 14px;
     color: var(--muted2);
-    font-size: 10px;
-    line-height: 1.45;
+    font-size: 11px;
+    line-height: 1.6;
   }
   .header-layout {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-direction: column;
     gap: 18px;
   }
   .header-copy {
     max-width: 760px;
   }
   .legacy {
-    display: none;
+    display: none !important;
   }
   @media (max-width: 900px) {
     .header-layout { flex-direction: column; }
     .header-copy { max-width: none; }
     .uploader { width: 100%; }
+    .upload-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
