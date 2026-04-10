@@ -221,48 +221,48 @@
 
   /* UPLOADER */
   .uploader {
-    margin: 24px 40px 0;
+    width: 420px;
     border: 1px solid rgba(59,130,246,.15);
     border-radius: 18px;
     background: linear-gradient(180deg, rgba(20,28,46,.96), rgba(11,15,26,.96));
     box-shadow: 0 18px 40px rgba(0,0,0,.18);
-    padding: 22px;
+    padding: 16px 16px 14px;
   }
   .uploader h2 {
     margin: 0 0 8px;
     font-family:'Syne',sans-serif;
-    font-size: 20px;
+    font-size: 16px;
     color: #fff;
   }
   .uploader p {
     margin: 0;
     color: var(--muted2);
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 12px;
+    line-height: 1.45;
   }
   .upload-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 14px;
-    margin-top: 18px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 12px;
   }
   .upload-card {
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 12px;
     background: rgba(255,255,255,.02);
-    padding: 16px;
+    padding: 12px;
   }
   .upload-card h3 {
-    margin: 0 0 8px;
-    font-size: 14px;
+    margin: 0 0 6px;
+    font-size: 13px;
     color: #fff;
   }
   .upload-card small {
     display: block;
     color: var(--muted2);
-    font-size: 12px;
-    line-height: 1.5;
-    margin-bottom: 10px;
+    font-size: 11px;
+    line-height: 1.4;
+    margin-bottom: 8px;
   }
   .upload-card input[type="file"] {
     width: 100%;
@@ -270,20 +270,20 @@
     background: rgba(11,15,26,.75);
     border: 1px dashed rgba(148,163,184,.25);
     border-radius: 10px;
-    padding: 10px;
+    padding: 8px;
   }
   .upload-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 16px;
+    margin-top: 12px;
   }
   .upload-actions button {
     border: none;
     border-radius: 12px;
     padding: 12px 16px;
     font-family:'Syne',sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
   }
@@ -314,35 +314,80 @@
   .status-pill.ready { color: #bbf7d0; background: rgba(16,185,129,.12); }
   .status-pill.warn { color: #fde68a; background: rgba(245,158,11,.14); }
   .upload-feedback {
-    margin-top: 14px;
+    margin-top: 10px;
     min-height: 20px;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted2);
-    line-height: 1.6;
+    line-height: 1.45;
   }
   .upload-feedback.error { color: #fecaca; }
   .upload-feedback.success { color: #bbf7d0; }
   .micro-note {
-    margin-top: 14px;
+    margin-top: 10px;
     color: var(--muted2);
-    font-size: 11px;
-    line-height: 1.6;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+  .header-layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+  }
+  .header-copy {
+    max-width: 760px;
+  }
+  .legacy {
+    display: none;
   }
   @media (max-width: 900px) {
-    .uploader { margin: 18px 20px 0; }
-    .upload-grid { grid-template-columns: 1fr; }
+    .header-layout { flex-direction: column; }
+    .header-copy { max-width: none; }
+    .uploader { width: 100%; }
   }
 </style>
 </head>
 <body>
 
 <header>
+  <div class="header-layout">
+    <div class="header-copy">
   <div class="label">Reporte Comercial · MLTI</div>
   <h1>Dashboard de <span>Cotizaciones</span></h1>
   <div class="subtitle">Enero & Febrero 2026 — Actualizado al 2 de marzo</div>
+    </div>
+    <div class="uploader">
+      <h2>Actualizar con Excel</h2>
+      <p>Sube cotizaciones y el reporte de ventas para recalcular el dashboard.</p>
+      <div class="upload-grid">
+        <div class="upload-card">
+          <h3>Cotizaciones</h3>
+          <small>DIA, Referencia, Cliente, Servicio, Usuario y Estatus.</small>
+          <input id="quotesFile" type="file" accept=".xlsx,.xls,.csv">
+          <div class="status-row">
+            <span id="quotesStatus" class="status-pill">Sin archivo</span>
+          </div>
+        </div>
+        <div class="upload-card">
+          <h3>Ventas / cierres</h3>
+          <small>Cliente, Dueño Cuenta, Embarque y fechas del cierre.</small>
+          <input id="closuresFile" type="file" accept=".xlsx,.xls,.csv">
+          <div class="status-row">
+            <span id="closuresStatus" class="status-pill warn">Opcional</span>
+          </div>
+        </div>
+      </div>
+      <div class="upload-actions">
+        <button id="processBtn" class="btn-primary" type="button">Procesar</button>
+        <button id="clearBtn" class="btn-secondary" type="button">Limpiar</button>
+      </div>
+      <div id="uploadFeedback" class="upload-feedback">Si algo falla, aquí aparecerá el error exacto de lectura.</div>
+      <div class="micro-note">La carga se guarda en este navegador. Si una celda trae varios servicios o usuarios, se separan automáticamente.</div>
+    </div>
+  </div>
 </header>
 
-<div class="uploader">
+<div class="uploader legacy">
   <h2>Actualizar con Excel</h2>
   <p>
     Sube tu archivo de <strong>cotizaciones</strong> y, si lo tienes, también tu archivo de <strong>cierres</strong>.
@@ -352,25 +397,25 @@
     <div class="upload-card">
       <h3>Archivo de cotizaciones</h3>
       <small>Columnas esperadas: DIA o Fecha, Referencia, Cliente, Servicio, Usuario y Estatus.</small>
-      <input id="quotesFile" type="file" accept=".xlsx,.xls,.csv">
+      <input id="quotesFileLegacy" type="file" accept=".xlsx,.xls,.csv">
       <div class="status-row">
-        <span id="quotesStatus" class="status-pill">Sin archivo</span>
+        <span id="quotesStatusLegacy" class="status-pill">Sin archivo</span>
       </div>
     </div>
     <div class="upload-card">
       <h3>Archivo de cierres</h3>
       <small>Columnas recomendadas: Fecha, Cliente, Servicio y Usuario. Referencia es opcional.</small>
-      <input id="closuresFile" type="file" accept=".xlsx,.xls,.csv">
+      <input id="closuresFileLegacy" type="file" accept=".xlsx,.xls,.csv">
       <div class="status-row">
-        <span id="closuresStatus" class="status-pill warn">Opcional</span>
+        <span id="closuresStatusLegacy" class="status-pill warn">Opcional</span>
       </div>
     </div>
   </div>
   <div class="upload-actions">
-    <button id="processBtn" class="btn-primary" type="button">Procesar archivos</button>
-    <button id="clearBtn" class="btn-secondary" type="button">Borrar carga guardada</button>
+    <button id="processBtnLegacy" class="btn-primary" type="button">Procesar archivos</button>
+    <button id="clearBtnLegacy" class="btn-secondary" type="button">Borrar carga guardada</button>
   </div>
-  <div id="uploadFeedback" class="upload-feedback">
+  <div id="uploadFeedbackLegacy" class="upload-feedback">
     Puedes empezar cargando solo cotizaciones. Si agregas cierres, el dashboard calculará hit rates y tendencias reales.
   </div>
   <div class="micro-note">
@@ -1006,8 +1051,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="app.js"></script>
-<script src="logic-v2.js"></script>
+<script src="logic-v2.js?v=3"></script>
 <script>
 function showTab(id) {
   document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
