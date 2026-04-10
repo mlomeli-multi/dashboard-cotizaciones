@@ -31,6 +31,40 @@ Este reporte fue construido para revisar el desempeño comercial del equipo de A
 
 Abre [index.html](C:\Users\Miguel Lomeli\OneDrive - Multitraslados Internacionales SA de CV\Documentos\New project\dashboard-cotizaciones-mlti\index.html) en tu navegador.
 
+## Cómo actualizar la data
+
+1. Abre el dashboard en tu navegador.
+2. En la parte superior, carga el archivo de `cotizaciones`.
+3. Si lo tienes, carga también el archivo de `cierres`.
+4. Haz clic en `Procesar archivos`.
+5. El dashboard recalculará KPIs, tablas, clientes, equipo y tendencia.
+
+### Encabezados recomendados
+
+Archivo de cotizaciones:
+
+- `DIA` o `Fecha`
+- `Referencia`
+- `Cliente`
+- `Servicio`
+- `Usuario`
+- `Estatus`
+
+Archivo de cierres:
+
+- `Fecha`
+- `Cliente`
+- `Servicio`
+- `Usuario`
+- `Referencia` opcional
+
+## Notas de funcionamiento
+
+- El dashboard acepta `.xlsx`, `.xls` y `.csv`.
+- Si una celda trae varios servicios o varios usuarios, intenta separarlos automáticamente.
+- La última carga exitosa se guarda en el navegador del equipo donde se abrió el dashboard.
+- Si no subes el archivo de cierres, el dashboard seguirá funcionando, pero los cierres y hit rates quedarán incompletos.
+
 ## Publicación en GitHub Pages
 
 1. Sube el proyecto al branch `main`.
